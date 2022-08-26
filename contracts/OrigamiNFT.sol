@@ -20,6 +20,8 @@ contract OrigamiNFT is ERC721URIStorage, OrigamiSVGStrings {
 
     mapping(address => NftHolder) private nftHolders;
 
+    uint[] public mintedTokenIds;
+
     string[] bgColours = [
         "#FFADAD",
         "#FFD6A5",
@@ -43,9 +45,35 @@ contract OrigamiNFT is ERC721URIStorage, OrigamiSVGStrings {
         "#98F5E1",
         "#B9FBC0"
     ];
+    string[] elements = [
+        "fire",
+        "water",
+        "wind",
+        "earth",
+        "dust",
+        "ice",
+        "mist",
+        "lava",
+        "sand"
+    ];
+    string[] traits = [
+        "abnormal",
+        "mystical",
+        "arcane",
+        "angelic",
+        "balanced",
+        "ardent",
+        "old-fashioned",
+        "mercurial",
+        "elvish",
+        "callous",
+        "chic",
+        "charming",
+        ""
+    ];
 
     constructor() ERC721("OrigamiSword", "OGSWORD") {
-        console.log("Pastel origami swords");
+        console.log("Booting up pastel origami swords collection");
         _tokenIds.increment();
     }
 
@@ -134,6 +162,30 @@ contract OrigamiNFT is ERC721URIStorage, OrigamiSVGStrings {
             );
     }
 
+    function pickRandomElement(uint256 tokenId)
+        public
+        view
+        returns (string memory)
+    {
+        uint256 rand = random(
+            string(abi.encodePacked("ELEMENT", Strings.toString(tokenId)))
+        );
+        rand = rand % elements.length;
+        return string(elements[rand]);
+    }
+
+    function pickRandomTrait(uint256 tokenId)
+        public
+        view
+        returns (string memory)
+    {
+        uint256 rand = random(
+            string(abi.encodePacked("RANDOM_TRAIT", Strings.toString(tokenId)))
+        );
+        rand = rand % traits.length;
+        return string(traits[rand]);
+    }
+
     function random(string memory input) internal pure returns (uint256) {
         return uint256(keccak256(abi.encodePacked(input)));
     }
@@ -150,12 +202,17 @@ contract OrigamiNFT is ERC721URIStorage, OrigamiSVGStrings {
         return nftHolders[_address].tokens;
     }
 
+    function getAllMintedTokens() public view returns (uint[] memory) {
+        return mintedTokenIds;
+    }
+
     function mintOrigamiNFT() public {
         uint256 newNFTId = _tokenIds.current();
 
         require(newNFTId < 101, "All NFTs minted!");
 
         setNftHolder(newNFTId);
+        mintedTokenIds.push(newNFTId);
 
         string memory chosenBgColour = pickRandomBGColour(newNFTId);
         string memory chosenBladeColour = pickRandomBladeColour(newNFTId);
@@ -175,6 +232,9 @@ contract OrigamiNFT is ERC721URIStorage, OrigamiSVGStrings {
             )
         );
 
+        string memory elementType = pickRandomElement(newNFTId);
+        string memory specialTrait = pickRandomTrait(newNFTId);
+
         string memory json = Base64.encode(
             bytes(
                 string(
@@ -182,9 +242,18 @@ contract OrigamiNFT is ERC721URIStorage, OrigamiSVGStrings {
                         '{"name": "',
                         "Origami Sword #",
                         Strings.toString(newNFTId),
-                        '", "description": "A beautiful collection of razor sharp origami swords.", "image": "data:image/svg+xml;base64,',
+                        '", "description": "A beautiful razor sharp sword from the Origami Swords collection", "image": "data:image/svg+xml;base64,',
                         Base64.encode(bytes(finalSvg)),
-                        '"}'
+                        '", ',
+                        '"attributes": [{"trait_type": "Element", "value": "',
+                        elementType,
+                        '"',
+                        "}, ",
+                        '{"trait_type": "Special Trait", "value": "',
+                        specialTrait,
+                        '"',
+                        "}",
+                        "]}"
                     )
                 )
             )

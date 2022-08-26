@@ -21,6 +21,9 @@ const main = async () => {
 
   let returnedArray = await nftContract.getTokensByAddress(deployer.address);
   console.log("holder tokens", returnedArray);
+
+  let allMintedTokenIds = await nftContract.getAllMintedTokens();
+  console.log("all minted tokens", allMintedTokenIds);
 };
 
 const runMain = async () => {
@@ -42,7 +45,8 @@ runMain();
 // which account does the fee go to?
 // test get balance account
 // map addresses to nfts
-// multiple nfts
+// user should be able to have multiple nfts
+// add traits to nfts (sword, element, rarity)
 
 // -- UI --
 // connect wallet

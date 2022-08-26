@@ -1,6 +1,7 @@
 import { ethers } from "hardhat";
 
 const main = async () => {
+  const [deployer] = await ethers.getSigners();
   const nftContractFactory = await ethers.getContractFactory("OrigamiNFT");
   const nftContract = await nftContractFactory.deploy();
   await nftContract.deployed();
@@ -15,6 +16,11 @@ const main = async () => {
   txn = await nftContract.mintOrigamiNFT();
   await txn.wait();
   console.log("nft #2 minted");
+
+  console.log("deployer address", deployer.address);
+
+  let returnedArray = await nftContract.getTokensByAddress(deployer.address);
+  console.log("holder tokens", returnedArray);
 };
 
 const runMain = async () => {
